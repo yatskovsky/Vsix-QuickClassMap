@@ -1,0 +1,1 @@
+# Vsix-QuickClassMap
