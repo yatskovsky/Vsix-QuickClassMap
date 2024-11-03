@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!--  The VSCT compiler (the tool that translates this file into the binary
+        format that VisualStudio will consume) has the ability to run a preprocessor
+        on the vsct file; this preprocessor is (usually) the C++ preprocessor, so
+        it is possible to define includes and macros with the same syntax used
+        in C++ files. Using this ability of the compiler here, we include some files
+        defining some of the constants that we will use inside the file. -->
+
+  <!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
+  <Extern href="stdidcmd.h"/>
+
+  <!--This header contains the command ids for the menus provided by the shell. -->
+  <Extern href="vsshlids.h"/>
+
+  <!--The Commands section is where commands, menus, and menu groups are defined.
+      This section uses a Guid to identify the package that provides the command defined inside it. -->
+  <Commands package="guidQuickClassMapPackage">
+    <Groups>
+      <Group guid="guidQuickClassMapPackageCmdSet" id="MyFolderMenuGroup" priority="0x0500">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_FOLDERNODE"/>
+      </Group>
+
+      <Group guid="guidQuickClassMapPackageCmdSet" id="MyFileMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE"/>
+      </Group>
+
+      <Group guid="guidQuickClassMapPackageCmdSet" id="MyProjectMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="GenerateClassMapCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="MyFolderMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Generate Class Map</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidQuickClassMapPackageCmdSet" id="GenerateClassMapCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="MyFileMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Generate Class Map</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidQuickClassMapPackageCmdSet" id="GenerateClassMapCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="MyProjectMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Generate Class Map</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+
+    <Bitmaps>
+      <Bitmap guid="guidImages" href="Resources\NewClassDiagram.png" usedList="bmpPic1"/>
+    </Bitmaps>
+  </Commands>
+
+  <Symbols>
+    <GuidSymbol name="guidQuickClassMapPackage" value="{d289ae80-b753-42e5-99f9-96294577de7c}" />
+
+    <!-- This is the guid used to group the menu commands together -->
+    <GuidSymbol name="guidQuickClassMapPackageCmdSet" value="{95f2241d-18d3-4cef-aa95-4dae87e9bfd7}">
+      <IDSymbol name="MyFolderMenuGroup" value="0x1020" />
+      <IDSymbol name="MyFileMenuGroup" value="0x1021" />
+      <IDSymbol name="MyProjectMenuGroup" value="0x1022" />
+      <IDSymbol name="GenerateClassMapCommandId" value="0x0100" />
+    </GuidSymbol>
+
+    <GuidSymbol name="guidImages" value="{1eeeab5c-6674-424f-9d25-2b8957ff4bc9}" >
+      <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
