@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="QuickClassMap.06992d30-af4f-47d9-ae03-fd78236ea0c6" Version="1.0.1" Language="en-US" Publisher="Viacheslav Yatskovsky" />
+        <Identity Id="QuickClassMap.06992d30-af4f-47d9-ae03-fd78236ea0c6" Version="1.1" Language="en-US" Publisher="Viacheslav Yatskovsky" />
         <DisplayName>Quick Class Map</DisplayName>
         <Description xml:space="preserve">Shows relationships between classes in your C# project or individual folders or files. Generates a DGML diagram.</Description>
         <MoreInfo>https://github.com/yatskovsky/Vsix-QuickClassMap</MoreInfo>

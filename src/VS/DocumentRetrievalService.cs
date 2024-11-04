@@ -46,6 +46,12 @@ namespace QuickClassMap.VS
                 else if (selectedItem.IsFile())
                 {
                     AddDocumentIfValid(selectedItem.ProjectItem, documents);
+
+                    // Collect nested files (like xaml.cs)
+                    if (selectedItem.ProjectItem.ProjectItems != null)
+                    {
+                        CollectDocuments(selectedItem.ProjectItem.ProjectItems, documents);
+                    }
                 }
             }
 
@@ -61,6 +67,12 @@ namespace QuickClassMap.VS
                 if (item.Kind == Constants.vsProjectItemKindPhysicalFile)
                 {
                     AddDocumentIfValid(item, documents);
+
+                    // Collect nested files (like xaml.cs)
+                    if (item.ProjectItems != null)
+                    {
+                        CollectDocuments(item.ProjectItems, documents);
+                    }
                 }
                 else if (item.Kind == Constants.vsProjectItemKindPhysicalFolder)
                 {
