@@ -17,17 +17,13 @@ namespace QuickClassMap.Domain
 
         public override bool Equals(object obj)
         {
-            if (obj is RelationshipInfo other)
-            {
-                return RelatedClassName == other.RelatedClassName &&
-                    Type == other.Type;
-            }
-            return false;
+            return obj is RelationshipInfo other &&
+                RelatedClassName == other.RelatedClassName;
         }
 
         public override int GetHashCode()
         {
-            return (RelatedClassName, Type).GetHashCode();
+            return RelatedClassName.GetHashCode();
         }
     }
 }

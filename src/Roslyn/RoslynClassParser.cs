@@ -57,7 +57,7 @@ namespace QuickClassMap.Roslyn
             var classInfo = new ClassInfo
             {
                 FullName = classSymbol.ToDisplayString(),
-                Name = classSymbol.Name,
+                Name = classSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat), // no namespace, keep generics
                 Relationships = new HashSet<RelationshipInfo>(),
                 IsInterface = isInterface
             };

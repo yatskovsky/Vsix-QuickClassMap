@@ -279,56 +279,41 @@ namespace QuickClassMap.Roslyn
 
         private void AddRelationship(ClassInfo classInfo, ITypeSymbol relatedType, RelationshipType relationshipType)
         {
-            // Determine the user-defined type
-            INamedTypeSymbol typeToAdd = null;
-            if (relatedType.SpecialType == SpecialType.None &&
-                relatedType is INamedTypeSymbol namedTypeSymbol &&
-                (namedTypeSymbol.IsDefinition || namedTypeSymbol.IsGenericType))
+            if (!(relatedType is INamedTypeSymbol namedTypeSymbol))
             {
-                if (namedTypeSymbol.IsGenericType)
+                return;
+            }
+
+            if (relationshipType != RelationshipType.Inherits &&
+                relationshipType != RelationshipType.Implements)
+            {
+                foreach (var typeArgument in namedTypeSymbol.TypeArguments)
                 {
-                    foreach (var typeArg in namedTypeSymbol.TypeArguments)
-                    {
-                        if (typeArg is INamedTypeSymbol namedTypeArg)
-                        {
-                            AddRelationship(classInfo, typeArg, relationshipType);
-                        }
-                    }
-                }
-                else
-                {
-                    // For other types, use the type as is
-                    typeToAdd = namedTypeSymbol;
+                    AddRelationship(classInfo, typeArgument, relationshipType);
                 }
             }
 
-            // Add the relationship if the type is valid and exists in our class map
-            if (typeToAdd != null && _symbolToClassInfoMap.ContainsKey(typeToAdd))
+            if (!_symbolToClassInfoMap.TryGetValue(namedTypeSymbol.OriginalDefinition, out var relatedClassInfo) ||
+                relatedClassInfo.FullName == classInfo.FullName)
             {
-                var relatedClassName = typeToAdd.ToDisplayString();
+                return;
+            }
 
-                // Prevent self-references
-                if (relatedClassName == classInfo.FullName)
-                {
-                    return;
-                }
+            var relationship = new RelationshipInfo
+            {
+                RelatedClassName = relatedClassInfo.FullName,
+                Type = relationshipType
+            };
 
-                var existingRelationship = classInfo.Relationships.FirstOrDefault(r => r.RelatedClassName == relatedClassName);
-
-                if (existingRelationship == null)
-                {
-                    classInfo.Relationships.Add(new RelationshipInfo
-                    {
-                        RelatedClassName = relatedClassName,
-                        Type = relationshipType
-                    });
-                }
-                else if (relationshipType < existingRelationship.Type)
-                {
-                    // If a relationship exists and the new type is stronger (lower enum value),
-                    // update the existing relationship
-                    existingRelationship.Type = relationshipType;
-                }
+            if (!classInfo.Relationships.TryGetValue(relationship, out var existingRelationship))
+            {
+                classInfo.Relationships.Add(relationship);
+            }
+            else if (relationshipType < existingRelationship.Type)
+            {
+                // If a relationship exists and the new type is stronger (lower enum value),
+                // update the existing relationship
+                existingRelationship.Type = relationshipType;
             }
         }
     }
