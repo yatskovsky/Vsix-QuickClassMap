@@ -1,4 +1,4 @@
-using QuickClassMap.Domain;
+using QuickClassMap.Core.Domain;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace QuickClassMap.Roslyn
+namespace QuickClassMap.Core.Roslyn
 {
     internal class RoslynClassParser
     {

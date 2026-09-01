@@ -5,9 +5,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using QuickClassMap.Domain;
+using QuickClassMap.Core.Domain;
 
-namespace QuickClassMap.Roslyn
+namespace QuickClassMap.Core.Roslyn
 {
     internal class RoslynRelationshipParser
     {

@@ -3,15 +3,15 @@ using System.ComponentModel.Design;
 using System.Threading;
 using System.Threading.Tasks;
 
-using QuickClassMap.Generators;
-using QuickClassMap.Helpers;
-using QuickClassMap.Roslyn;
-using QuickClassMap.VS;
+using QuickClassMap.Core.Generators;
+using QuickClassMap.Core.Helpers;
+using QuickClassMap.Core.Roslyn;
+using QuickClassMap.VS.Helpers;
 
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace QuickClassMap
+namespace QuickClassMap.VS
 {
     /// <summary>
     /// Command handler

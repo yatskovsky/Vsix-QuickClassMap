@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace QuickClassMap.Domain
+namespace QuickClassMap.Core.Domain
 {
     public sealed class SolutionDirectory
     {

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Microsoft.VisualStudio.Shell;
 
-namespace QuickClassMap.Helpers
+namespace QuickClassMap.VS.Helpers
 {
     internal static class AsyncHelper
     {

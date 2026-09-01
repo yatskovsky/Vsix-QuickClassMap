@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace QuickClassMap.Domain
+namespace QuickClassMap.Core.Domain
 {
     public class ClassInfo
     {

@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
 
-using QuickClassMap.Domain;
+using QuickClassMap.Core.Domain;
 
 namespace QuickClassMap.VS
 {

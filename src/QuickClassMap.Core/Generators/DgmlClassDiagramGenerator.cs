@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-using QuickClassMap.Domain;
+using QuickClassMap.Core.Domain;
 
-namespace QuickClassMap.Generators
+namespace QuickClassMap.Core.Generators
 {
     public class DgmlClassDiagramGenerator
     {

@@ -1,4 +1,4 @@
-namespace QuickClassMap.Domain
+namespace QuickClassMap.Core.Domain
 {
     public enum RelationshipType
     {

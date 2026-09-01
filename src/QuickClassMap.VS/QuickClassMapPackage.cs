@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using Microsoft.VisualStudio.Shell;
 
-namespace QuickClassMap
+namespace QuickClassMap.VS
 {
 	/// <summary>
 	/// This is the class that implements the package exposed by this assembly.

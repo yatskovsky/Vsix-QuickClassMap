@@ -1,6 +1,6 @@
 using System;
 
-namespace QuickClassMap.Helpers
+namespace QuickClassMap.Core.Helpers
 {
     public class InfoException : Exception
     {

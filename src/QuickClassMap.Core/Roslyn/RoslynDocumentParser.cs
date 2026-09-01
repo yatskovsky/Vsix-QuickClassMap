@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using QuickClassMap.Domain;
-using QuickClassMap.Helpers;
+using QuickClassMap.Core.Domain;
+using QuickClassMap.Core.Helpers;
 
 using Microsoft.CodeAnalysis;
 
-namespace QuickClassMap.Roslyn
+namespace QuickClassMap.Core.Roslyn
 {
-    internal class RoslynDocumentParser
+    public class RoslynDocumentParser
     {
         private readonly Workspace _workspace;
 
