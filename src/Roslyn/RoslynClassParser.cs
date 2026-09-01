@@ -58,6 +58,7 @@ namespace QuickClassMap.Roslyn
             {
                 FullName = classSymbol.ToDisplayString(),
                 Name = classSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat), // no namespace, keep generics
+                SourceFilePath = classSymbol.Locations.FirstOrDefault(location => location.IsInSource)?.SourceTree?.FilePath,
                 Relationships = new HashSet<RelationshipInfo>(),
                 IsInterface = isInterface
             };

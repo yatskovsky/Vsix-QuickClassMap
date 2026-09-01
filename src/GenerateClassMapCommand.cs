@@ -152,13 +152,16 @@ namespace QuickClassMap
                 // Collect class info from the selected documents
                 statusBarService.ShowProgress("Generating diagram: initialize parser...", 0);
 
-                var documentParser = new RoslynDocumentParser(AsyncServiceProvider);
+                var workspaceProvider = new WorkspaceProvider(AsyncServiceProvider);
+                var workspace = await workspaceProvider.GetWorkspaceAsync();
+                var solutionDirectory = workspaceProvider.GetSolutionDirectory(workspace);
+                var documentParser = new RoslynDocumentParser(workspace);
                 var classInfos = await documentParser.ParseAsync(selectedDocuments, new Progress<int>(UpdateProgress));
 
                 // Generate class diagrams
                 statusBarService.ShowProgress("Generating diagram: generate output...", 0);
 
-                var dgmlClassDiagram = new DgmlClassDiagramGenerator(documentParser.DefaultNamespace)
+                var dgmlClassDiagram = new DgmlClassDiagramGenerator(documentParser.DefaultNamespace, solutionDirectory)
                      .Generate(classInfos);
 
                 var docCreationService = new DocumentCreationService(ServiceProvider);
@@ -184,5 +187,6 @@ namespace QuickClassMap
                 });
             }
         }
+
     }
 }

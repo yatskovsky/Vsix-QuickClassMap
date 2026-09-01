@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
@@ -47,6 +47,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Domain\RelationshipInfo.cs" />
+    <Compile Include="Domain\SolutionDirectory.cs" />
     <Compile Include="Helpers\AsyncHelper.cs" />
     <Compile Include="Generators\DgmlClassDiagramGenerator.cs" />
     <Compile Include="Domain\Namespace.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="VS\DocumentCreationService.cs" />
     <Compile Include="VS\DocumentRetrievalService.cs" />
     <Compile Include="VS\SelectedItemExtensions.cs" />
+    <Compile Include="VS\WorkspaceProvider.cs" />
     <Compile Include="VS\StatusBarService.cs" />
   </ItemGroup>
   <ItemGroup>

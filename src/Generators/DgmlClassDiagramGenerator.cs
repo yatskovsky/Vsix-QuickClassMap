@@ -12,10 +12,12 @@ namespace QuickClassMap.Generators
         private static readonly XNamespace _ns = "http://schemas.microsoft.com/vs/2009/dgml";
 
         private readonly Namespace _defaultNamespace;
+        private readonly SolutionDirectory _solutionDirectory;
 
-        public DgmlClassDiagramGenerator(Namespace defaultNamespace)
+        public DgmlClassDiagramGenerator(Namespace defaultNamespace, SolutionDirectory solutionDirectory)
         {
-            _defaultNamespace = defaultNamespace;
+            _defaultNamespace = defaultNamespace ?? throw new ArgumentNullException(nameof(defaultNamespace));
+            _solutionDirectory = solutionDirectory ?? throw new ArgumentNullException(nameof(solutionDirectory));
         }
 
         public string Generate(List<ClassInfo> classes)
@@ -26,7 +28,8 @@ namespace QuickClassMap.Generators
                 new XElement(_ns + "Nodes", GenerateDgmlNodes(hierarchyRoot)),
                 new XElement(_ns + "Links", GenerateContainsLinks(hierarchyRoot), AddAllRelationships(classes)),
                 AddCategories(),
-                AddStyles()
+                AddStyles(),
+                AddPaths()
             );
 
             XDocument doc = new XDocument(
@@ -62,6 +65,7 @@ namespace QuickClassMap.Generators
                     new XAttribute("Id", FormatClassName(classInfo.FullName)),
                     new XAttribute("Label", FormatClassName(classInfo.Name)),
                     new XAttribute("Category", classInfo.IsInterface ? "CodeSchema_Interface" : "CodeSchema_Class"),
+                    !string.IsNullOrEmpty(classInfo.SourceFilePath) ? new XAttribute("Reference", FormatSourceReference(classInfo.SourceFilePath)) : null,
                     !string.IsNullOrEmpty(currentNamespace) ? new XAttribute("Group", FormatNamespace(currentNamespace)) : null
                 );
             }
@@ -73,6 +77,15 @@ namespace QuickClassMap.Generators
                     yield return element;
                 }
             }
+        }
+
+        private string FormatSourceReference(string sourceFilePath)
+        {
+            var sourceUri = new Uri(sourceFilePath);
+            var relativePath = _solutionDirectory.GetRelativePath(sourceFilePath);
+            return relativePath == null
+                ? sourceUri.AbsoluteUri
+                : $"$(VsSolution)\\{relativePath}";
         }
 
         private IEnumerable<XElement> GenerateContainsLinks(NamespaceNode root)
@@ -176,6 +189,14 @@ namespace QuickClassMap.Generators
             }
 
             return style;
+        }
+
+        private XElement AddPaths()
+        {
+            return new XElement(_ns + "Paths",
+                new XElement(_ns + "Path",
+                    new XAttribute("Id", "VsSolution"),
+                    new XAttribute("Value", _solutionDirectory.DirectoryPath)));
         }
 
         private string FormatClassName(string name)
