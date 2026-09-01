@@ -3,7 +3,7 @@ using System;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace QuickClassMap.VS
+namespace QuickClassMap.VS.Services
 {
     internal class StatusBarService
     {

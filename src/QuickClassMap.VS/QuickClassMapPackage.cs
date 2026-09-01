@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 
 using Microsoft.VisualStudio.Shell;
 
+using QuickClassMap.VS.Commands;
+
 namespace QuickClassMap.VS
 {
 	/// <summary>

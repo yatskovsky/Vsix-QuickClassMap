@@ -8,7 +8,7 @@ using EnvDTE80;
 
 using Microsoft.VisualStudio.Shell;
 
-namespace QuickClassMap.VS
+namespace QuickClassMap.VS.Services
 {
     internal class DocumentRetrievalService
     {

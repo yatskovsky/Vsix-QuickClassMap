@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.Shell;
 
 using QuickClassMap.Core.Domain;
 
-namespace QuickClassMap.VS
+namespace QuickClassMap.VS.Services
 {
     internal class WorkspaceProvider
     {

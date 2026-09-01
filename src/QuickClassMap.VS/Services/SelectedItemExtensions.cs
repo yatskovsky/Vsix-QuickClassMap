@@ -1,6 +1,6 @@
 using EnvDTE;
 
-namespace QuickClassMap.VS
+namespace QuickClassMap.VS.Services
 {
     public static class SelectedItemExtensions
     {

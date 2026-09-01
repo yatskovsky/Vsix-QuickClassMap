@@ -7,11 +7,12 @@ using QuickClassMap.Core.Generators;
 using QuickClassMap.Core.Helpers;
 using QuickClassMap.Core.Roslyn;
 using QuickClassMap.VS.Helpers;
+using QuickClassMap.VS.Services;
 
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace QuickClassMap.VS
+namespace QuickClassMap.VS.Commands
 {
     /// <summary>
     /// Command handler
