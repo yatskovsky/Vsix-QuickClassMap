@@ -1,0 +1,14 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="arm64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="src/QuickClassMap.Core/QuickClassMap.Core.csproj" />
+  <Project Path="src/QuickClassMap.VS/QuickClassMap.VS.csproj">
+    <Deploy />
+  </Project>
+</Solution>
