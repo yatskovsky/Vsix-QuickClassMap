@@ -7,8 +7,13 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
-  <Project Path="src/QuickClassMap.Core/QuickClassMap.Core.csproj" />
-  <Project Path="src/QuickClassMap.VS/QuickClassMap.VS.csproj">
-    <Deploy />
-  </Project>
+  <Folder Name="/src/">
+    <Project Path="src/QuickClassMap.Core/QuickClassMap.Core.csproj" />
+    <Project Path="src/QuickClassMap.VS/QuickClassMap.VS.csproj">
+      <Deploy />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/QuickClassMap.Tests/QuickClassMap.Tests.csproj" />
+  </Folder>
 </Solution>
