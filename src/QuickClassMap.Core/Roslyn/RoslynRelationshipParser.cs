@@ -107,7 +107,7 @@ namespace QuickClassMap.Core.Roslyn
                 AddRelationship(classInfo, parameter.Type, RelationshipType.Uses);
             }
 
-            if (method.ReturnType != null && !SymbolEqualityComparer.Default.Equals(method.ReturnType, containingType))
+            if (!SymbolEqualityComparer.Default.Equals(method.ReturnType, containingType))
             {
                 AddRelationship(classInfo, method.ReturnType, RelationshipType.Uses);
             }
