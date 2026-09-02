@@ -7,6 +7,7 @@
     <RootNamespace>QuickClassMap.VS</RootNamespace>
 
     <!-- VSIX settings -->
+    <TargetVsixContainerName>QuickClassMap.vsix</TargetVsixContainerName>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
