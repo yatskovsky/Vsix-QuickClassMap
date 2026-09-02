@@ -5,10 +5,11 @@ using Microsoft.CodeAnalysis.CSharp;
 
 using QuickClassMap.Core.Domain;
 using QuickClassMap.Core.Roslyn;
+using QuickClassMap.Core.Roslyn.Parsing;
 
 namespace QuickClassMap.Tests;
 
-public sealed class RoslynParserFixture
+public sealed class RoslynClassParserFixture
 {
     public List<ClassInfo> Parse(string source)
     {

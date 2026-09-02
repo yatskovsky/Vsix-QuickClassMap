@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using QuickClassMap.Core.Domain;
 
-namespace QuickClassMap.Core.Roslyn
+namespace QuickClassMap.Core.Roslyn.Parsing
 {
     internal class RoslynRelationshipParser
     {
@@ -26,57 +26,75 @@ namespace QuickClassMap.Core.Roslyn
         {
             BuildInheritanceHierarchy();
 
-            foreach (var classSymbol in _symbolToClassInfoMap.Keys)
+            foreach (var classSymbol in _symbolToClassInfoMap.Keys.ToList())
             {
                 var classInfo = _symbolToClassInfoMap[classSymbol];
-                ExtractRelationships(classSymbol, classInfo);
+                foreach (var relationship in ExtractSymbolRelationships(classSymbol))
+                {
+                    AddRelationship(classInfo, relationship.Target, relationship.Type);
+                }
             }
+        }
+
+        public IReadOnlyCollection<SymbolRelationship> ExtractSymbolRelationships(INamedTypeSymbol classSymbol)
+        {
+            var relationships = new List<SymbolRelationship>();
+            classSymbol = classSymbol.OriginalDefinition;
+            BuildInheritanceHierarchy(classSymbol);
+            ExtractRelationships(classSymbol, relationships);
+            return relationships;
         }
 
         private void BuildInheritanceHierarchy()
         {
             foreach (var classSymbol in _symbolToClassInfoMap.Keys)
             {
-                var hierarchy = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-                var currentType = classSymbol;
-                while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
-                {
-                    hierarchy.Add(currentType);
-                    currentType = currentType.BaseType;
-                }
-                _inheritanceHierarchy[classSymbol] = hierarchy;
+                BuildInheritanceHierarchy(classSymbol);
             }
         }
 
-        private void ExtractRelationships(INamedTypeSymbol classSymbol, ClassInfo classInfo)
+        private void BuildInheritanceHierarchy(INamedTypeSymbol classSymbol)
+        {
+            classSymbol = classSymbol.OriginalDefinition;
+            var hierarchy = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+            var currentType = classSymbol;
+            while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
+            {
+                hierarchy.Add(currentType.OriginalDefinition);
+                currentType = currentType.BaseType;
+            }
+            _inheritanceHierarchy[classSymbol] = hierarchy;
+        }
+
+        private void ExtractRelationships(INamedTypeSymbol classSymbol, ICollection<SymbolRelationship> relationships)
         {
             if (classSymbol.BaseType != null && classSymbol.BaseType.SpecialType != SpecialType.System_Object)
             {
-                AddRelationship(classInfo, classSymbol.BaseType, RelationshipType.Inherits);
+                AddSymbolRelationship(relationships, classSymbol, classSymbol.BaseType, RelationshipType.Inherits);
             }
 
             foreach (var @interface in classSymbol.Interfaces)
             {
-                AddRelationship(classInfo, @interface, RelationshipType.Implements);
+                AddSymbolRelationship(relationships, classSymbol, @interface, RelationshipType.Implements);
             }
 
             foreach (var member in classSymbol.GetMembers())
             {
-                ProcessMember(classInfo, member, classSymbol);
+                ProcessMember(relationships, member, classSymbol);
             }
         }
 
-        private void ProcessMember(ClassInfo classInfo, ISymbol member, INamedTypeSymbol containingType)
+        private void ProcessMember(ICollection<SymbolRelationship> relationships, ISymbol member, INamedTypeSymbol containingType)
         {
             if (member is IMethodSymbol methodSymbol)
             {
                 if (methodSymbol.MethodKind == MethodKind.Constructor)
                 {
-                    ProcessConstructor(classInfo, methodSymbol);
+                    ProcessConstructor(relationships, methodSymbol);
                 }
                 else
                 {
-                    ProcessMethod(classInfo, methodSymbol, containingType);
+                    ProcessMethod(relationships, methodSymbol, containingType);
                 }
             }
             else
@@ -85,37 +103,37 @@ namespace QuickClassMap.Core.Roslyn
                 if (typeSymbol != null && !SymbolEqualityComparer.Default.Equals(typeSymbol, containingType))
                 {
                     RelationshipType relationshipType = DetermineRelationshipType(member, typeSymbol, containingType);
-                    AddRelationship(classInfo, typeSymbol, relationshipType);
+                    AddSymbolRelationship(relationships, containingType, typeSymbol, relationshipType);
                 }
             }
         }
 
-        private void ProcessConstructor(ClassInfo classInfo, IMethodSymbol constructor)
+        private void ProcessConstructor(ICollection<SymbolRelationship> relationships, IMethodSymbol constructor)
         {
             foreach (var parameter in constructor.Parameters)
             {
-                AddRelationship(classInfo, parameter.Type, RelationshipType.Aggregates);
+                AddSymbolRelationship(relationships, constructor.ContainingType, parameter.Type, RelationshipType.Aggregates);
             }
 
-            ProcessMethodBody(classInfo, constructor, constructor.ContainingType);
+            ProcessMethodBody(relationships, constructor, constructor.ContainingType);
         }
 
-        private void ProcessMethod(ClassInfo classInfo, IMethodSymbol method, INamedTypeSymbol containingType)
+        private void ProcessMethod(ICollection<SymbolRelationship> relationships, IMethodSymbol method, INamedTypeSymbol containingType)
         {
             foreach (var parameter in method.Parameters)
             {
-                AddRelationship(classInfo, parameter.Type, RelationshipType.Uses);
+                AddSymbolRelationship(relationships, containingType, parameter.Type, RelationshipType.Uses);
             }
 
             if (!SymbolEqualityComparer.Default.Equals(method.ReturnType, containingType))
             {
-                AddRelationship(classInfo, method.ReturnType, RelationshipType.Uses);
+                AddSymbolRelationship(relationships, containingType, method.ReturnType, RelationshipType.Uses);
             }
 
-            ProcessMethodBody(classInfo, method, containingType);
+            ProcessMethodBody(relationships, method, containingType);
         }
 
-        private void ProcessMethodBody(ClassInfo classInfo, IMethodSymbol method, INamedTypeSymbol containingType)
+        private void ProcessMethodBody(ICollection<SymbolRelationship> relationships, IMethodSymbol method, INamedTypeSymbol containingType)
         {
             var syntax = method.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
             if (syntax is MethodDeclarationSyntax methodSyntax)
@@ -133,7 +151,7 @@ namespace QuickClassMap.Core.Roslyn
                                 !SymbolEqualityComparer.Default.Equals(invokedMethod.ContainingType, containingType) &&
                                 !IsInInheritanceHierarchy(containingType, invokedMethod.ContainingType))
                             {
-                                AddRelationship(classInfo, invokedMethod.ContainingType, RelationshipType.Uses);
+                                AddSymbolRelationship(relationships, containingType, invokedMethod.ContainingType, RelationshipType.Uses);
                             }
                         }
 
@@ -146,7 +164,7 @@ namespace QuickClassMap.Core.Roslyn
                                 {
                                     if (semanticModel.GetTypeInfo(typeArgSyntax).Type is INamedTypeSymbol typeSymbol)
                                     {
-                                        AddRelationship(classInfo, typeSymbol, RelationshipType.Uses);
+                                        AddSymbolRelationship(relationships, containingType, typeSymbol, RelationshipType.Uses);
                                     }
                                 }
                             }
@@ -159,25 +177,25 @@ namespace QuickClassMap.Core.Roslyn
                             !IsInInheritanceHierarchy(containingType, createdType) &&
                             !method.IsStatic)
                         {
-                            AddRelationship(classInfo, createdType, RelationshipType.Composes);
+                            AddSymbolRelationship(relationships, containingType, createdType, RelationshipType.Composes);
                         }
                     }
                     else if (node is CastExpressionSyntax castExpression)
                     {
-                        ProcessTypeConversion(classInfo, castExpression.Type, semanticModel, containingType);
+                        ProcessTypeConversion(relationships, castExpression.Type, semanticModel, containingType);
                     }
                     else if (node is BinaryExpressionSyntax binaryExpression &&
                         (binaryExpression.OperatorToken.IsKind(SyntaxKind.AsKeyword) ||
                         binaryExpression.OperatorToken.IsKind(SyntaxKind.IsKeyword)))
                     {
-                        ProcessTypeConversion(classInfo, binaryExpression.Right, semanticModel, containingType);
+                        ProcessTypeConversion(relationships, binaryExpression.Right, semanticModel, containingType);
                     }
                     else if (node is SimpleLambdaExpressionSyntax simpleLambda)
                     {
                         var parameterSymbol = semanticModel.GetDeclaredSymbol(simpleLambda.Parameter);
                         if (parameterSymbol != null)
                         {
-                            AddRelationship(classInfo, parameterSymbol.Type, RelationshipType.Uses);
+                            AddSymbolRelationship(relationships, containingType, parameterSymbol.Type, RelationshipType.Uses);
                         }
                     }
                     else if (node is ParenthesizedLambdaExpressionSyntax parenthesizedLambda)
@@ -187,7 +205,7 @@ namespace QuickClassMap.Core.Roslyn
                             var parameterSymbol = semanticModel.GetDeclaredSymbol(parameter);
                             if (parameterSymbol != null)
                             {
-                                AddRelationship(classInfo, parameterSymbol.Type, RelationshipType.Uses);
+                                AddSymbolRelationship(relationships, containingType, parameterSymbol.Type, RelationshipType.Uses);
                             }
                         }
                     }
@@ -197,6 +215,8 @@ namespace QuickClassMap.Core.Roslyn
 
         private bool IsInInheritanceHierarchy(INamedTypeSymbol derivedType, INamedTypeSymbol potentialBaseType)
         {
+            derivedType = derivedType.OriginalDefinition;
+            potentialBaseType = potentialBaseType.OriginalDefinition;
             if (_inheritanceHierarchy.TryGetValue(derivedType, out var hierarchy))
             {
                 return hierarchy.Contains(potentialBaseType);
@@ -204,14 +224,14 @@ namespace QuickClassMap.Core.Roslyn
             return false;
         }
 
-        private void ProcessTypeConversion(ClassInfo classInfo, SyntaxNode typeNode, SemanticModel semanticModel, INamedTypeSymbol containingType)
+        private void ProcessTypeConversion(ICollection<SymbolRelationship> relationships, SyntaxNode typeNode, SemanticModel semanticModel, INamedTypeSymbol containingType)
         {
             var convertedType = semanticModel.GetTypeInfo(typeNode).Type;
             if (convertedType is INamedTypeSymbol namedType &&
                 !SymbolEqualityComparer.Default.Equals(namedType, containingType) &&
                 !IsInInheritanceHierarchy(containingType, namedType))
             {
-                AddRelationship(classInfo, namedType, RelationshipType.Uses);
+                AddSymbolRelationship(relationships, containingType, namedType, RelationshipType.Uses);
             }
         }
 
@@ -315,6 +335,36 @@ namespace QuickClassMap.Core.Roslyn
                 // update the existing relationship
                 existingRelationship.Type = relationshipType;
             }
+        }
+
+        private void AddSymbolRelationship(
+            ICollection<SymbolRelationship> relationships,
+            INamedTypeSymbol source,
+            ITypeSymbol relatedType,
+            RelationshipType relationshipType)
+        {
+            if (!(relatedType is INamedTypeSymbol namedTypeSymbol))
+            {
+                return;
+            }
+
+            if (relationshipType != RelationshipType.Inherits &&
+                relationshipType != RelationshipType.Implements)
+            {
+                foreach (var typeArgument in namedTypeSymbol.TypeArguments)
+                {
+                    AddSymbolRelationship(relationships, source, typeArgument, relationshipType);
+                }
+            }
+
+            var target = namedTypeSymbol.OriginalDefinition;
+            source = source.OriginalDefinition;
+            if (SymbolEqualityComparer.Default.Equals(target, source))
+            {
+                return;
+            }
+
+            relationships.Add(new SymbolRelationship(source, target, relationshipType));
         }
     }
 }

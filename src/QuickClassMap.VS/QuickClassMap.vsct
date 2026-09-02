@@ -29,7 +29,75 @@
       <Group guid="guidQuickClassMapPackageCmdSet" id="MyProjectMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
       </Group>
+
+      <Group guid="guidQuickClassMapPackageCmdSet" id="WalkUpFolderMenuGroupId" priority="0x0100">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFolderMenuId" />
+      </Group>
+
+      <Group guid="guidQuickClassMapPackageCmdSet" id="WalkDownFolderMenuGroupId" priority="0x0100">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFolderMenuId" />
+      </Group>
+
+      <Group guid="guidQuickClassMapPackageCmdSet" id="WalkUpFileMenuGroupId" priority="0x0100">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFileMenuId" />
+      </Group>
+
+      <Group guid="guidQuickClassMapPackageCmdSet" id="WalkDownFileMenuGroupId" priority="0x0100">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFileMenuId" />
+      </Group>
+
+      <Group guid="guidQuickClassMapPackageCmdSet" id="WalkUpProjectMenuGroupId" priority="0x0100">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpProjectMenuId" />
+      </Group>
+
+      <Group guid="guidQuickClassMapPackageCmdSet" id="WalkDownProjectMenuGroupId" priority="0x0100">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownProjectMenuId" />
+      </Group>
     </Groups>
+
+    <Menus>
+      <Menu guid="guidQuickClassMapPackageCmdSet" id="WalkUpFolderMenuId" priority="0x010F" type="Menu">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="MyFolderMenuGroup" />
+        <Strings>
+          <ButtonText>Walk Up Class Map</ButtonText>
+        </Strings>
+      </Menu>
+
+      <Menu guid="guidQuickClassMapPackageCmdSet" id="WalkDownFolderMenuId" priority="0x0110" type="Menu">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="MyFolderMenuGroup" />
+        <Strings>
+          <ButtonText>Walk Down Class Map</ButtonText>
+        </Strings>
+      </Menu>
+
+      <Menu guid="guidQuickClassMapPackageCmdSet" id="WalkUpFileMenuId" priority="0x010F" type="Menu">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="MyFileMenuGroup" />
+        <Strings>
+          <ButtonText>Walk Up Class Map</ButtonText>
+        </Strings>
+      </Menu>
+
+      <Menu guid="guidQuickClassMapPackageCmdSet" id="WalkDownFileMenuId" priority="0x0110" type="Menu">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="MyFileMenuGroup" />
+        <Strings>
+          <ButtonText>Walk Down Class Map</ButtonText>
+        </Strings>
+      </Menu>
+
+      <Menu guid="guidQuickClassMapPackageCmdSet" id="WalkUpProjectMenuId" priority="0x010F" type="Menu">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="MyProjectMenuGroup" />
+        <Strings>
+          <ButtonText>Walk Up Class Map</ButtonText>
+        </Strings>
+      </Menu>
+
+      <Menu guid="guidQuickClassMapPackageCmdSet" id="WalkDownProjectMenuId" priority="0x0110" type="Menu">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="MyProjectMenuGroup" />
+        <Strings>
+          <ButtonText>Walk Down Class Map</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
 
     <Buttons>
       <Button guid="guidQuickClassMapPackageCmdSet" id="GenerateClassMapCommandId" priority="0x0100" type="Button">
@@ -55,6 +123,132 @@
           <ButtonText>Generate Class Map</ButtonText>
         </Strings>
       </Button>
+
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth1CommandId" priority="0x0100" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFolderMenuGroupId" />
+        <Strings><ButtonText>1</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth2CommandId" priority="0x0110" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFolderMenuGroupId" />
+        <Strings><ButtonText>2</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth3CommandId" priority="0x0120" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFolderMenuGroupId" />
+        <Strings><ButtonText>3</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth5CommandId" priority="0x0130" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFolderMenuGroupId" />
+        <Strings><ButtonText>5</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth8CommandId" priority="0x0140" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFolderMenuGroupId" />
+        <Strings><ButtonText>8</ButtonText></Strings>
+      </Button>
+
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth1CommandId" priority="0x0100" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFolderMenuGroupId" />
+        <Strings><ButtonText>1</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth2CommandId" priority="0x0110" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFolderMenuGroupId" />
+        <Strings><ButtonText>2</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth3CommandId" priority="0x0120" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFolderMenuGroupId" />
+        <Strings><ButtonText>3</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth5CommandId" priority="0x0130" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFolderMenuGroupId" />
+        <Strings><ButtonText>5</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth8CommandId" priority="0x0140" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFolderMenuGroupId" />
+        <Strings><ButtonText>8</ButtonText></Strings>
+      </Button>
+
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth1CommandId" priority="0x0100" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFileMenuGroupId" />
+        <Strings><ButtonText>1</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth2CommandId" priority="0x0110" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFileMenuGroupId" />
+        <Strings><ButtonText>2</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth3CommandId" priority="0x0120" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFileMenuGroupId" />
+        <Strings><ButtonText>3</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth5CommandId" priority="0x0130" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFileMenuGroupId" />
+        <Strings><ButtonText>5</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth8CommandId" priority="0x0140" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpFileMenuGroupId" />
+        <Strings><ButtonText>8</ButtonText></Strings>
+      </Button>
+
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth1CommandId" priority="0x0100" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFileMenuGroupId" />
+        <Strings><ButtonText>1</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth2CommandId" priority="0x0110" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFileMenuGroupId" />
+        <Strings><ButtonText>2</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth3CommandId" priority="0x0120" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFileMenuGroupId" />
+        <Strings><ButtonText>3</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth5CommandId" priority="0x0130" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFileMenuGroupId" />
+        <Strings><ButtonText>5</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth8CommandId" priority="0x0140" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownFileMenuGroupId" />
+        <Strings><ButtonText>8</ButtonText></Strings>
+      </Button>
+
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth1CommandId" priority="0x0100" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpProjectMenuGroupId" />
+        <Strings><ButtonText>1</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth2CommandId" priority="0x0110" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpProjectMenuGroupId" />
+        <Strings><ButtonText>2</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth3CommandId" priority="0x0120" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpProjectMenuGroupId" />
+        <Strings><ButtonText>3</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth5CommandId" priority="0x0130" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpProjectMenuGroupId" />
+        <Strings><ButtonText>5</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkUpDepth8CommandId" priority="0x0140" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkUpProjectMenuGroupId" />
+        <Strings><ButtonText>8</ButtonText></Strings>
+      </Button>
+
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth1CommandId" priority="0x0100" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownProjectMenuGroupId" />
+        <Strings><ButtonText>1</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth2CommandId" priority="0x0110" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownProjectMenuGroupId" />
+        <Strings><ButtonText>2</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth3CommandId" priority="0x0120" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownProjectMenuGroupId" />
+        <Strings><ButtonText>3</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth5CommandId" priority="0x0130" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownProjectMenuGroupId" />
+        <Strings><ButtonText>5</ButtonText></Strings>
+      </Button>
+      <Button guid="guidQuickClassMapPackageCmdSet" id="WalkDownDepth8CommandId" priority="0x0140" type="Button">
+        <Parent guid="guidQuickClassMapPackageCmdSet" id="WalkDownProjectMenuGroupId" />
+        <Strings><ButtonText>8</ButtonText></Strings>
+      </Button>
     </Buttons>
 
     <Bitmaps>
@@ -71,6 +265,29 @@
       <IDSymbol name="MyFileMenuGroup" value="0x1021" />
       <IDSymbol name="MyProjectMenuGroup" value="0x1022" />
       <IDSymbol name="GenerateClassMapCommandId" value="0x0100" />
+      <!-- Keep depth command IDs stable for compatibility with existing registrations -->
+      <IDSymbol name="WalkUpDepth1CommandId" value="0x0110" />
+      <IDSymbol name="WalkUpDepth2CommandId" value="0x0111" />
+      <IDSymbol name="WalkUpDepth3CommandId" value="0x0112" />
+      <IDSymbol name="WalkUpDepth5CommandId" value="0x0113" />
+      <IDSymbol name="WalkUpDepth8CommandId" value="0x0114" />
+      <IDSymbol name="WalkDownDepth1CommandId" value="0x0120" />
+      <IDSymbol name="WalkDownDepth2CommandId" value="0x0121" />
+      <IDSymbol name="WalkDownDepth3CommandId" value="0x0122" />
+      <IDSymbol name="WalkDownDepth5CommandId" value="0x0123" />
+      <IDSymbol name="WalkDownDepth8CommandId" value="0x0124" />
+      <IDSymbol name="WalkUpFolderMenuId" value="0x1030" />
+      <IDSymbol name="WalkDownFolderMenuId" value="0x1031" />
+      <IDSymbol name="WalkUpFileMenuId" value="0x1032" />
+      <IDSymbol name="WalkDownFileMenuId" value="0x1033" />
+      <IDSymbol name="WalkUpProjectMenuId" value="0x1034" />
+      <IDSymbol name="WalkDownProjectMenuId" value="0x1035" />
+      <IDSymbol name="WalkUpFolderMenuGroupId" value="0x1040" />
+      <IDSymbol name="WalkDownFolderMenuGroupId" value="0x1041" />
+      <IDSymbol name="WalkUpFileMenuGroupId" value="0x1042" />
+      <IDSymbol name="WalkDownFileMenuGroupId" value="0x1043" />
+      <IDSymbol name="WalkUpProjectMenuGroupId" value="0x1044" />
+      <IDSymbol name="WalkDownProjectMenuGroupId" value="0x1045" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{1eeeab5c-6674-424f-9d25-2b8957ff4bc9}" >

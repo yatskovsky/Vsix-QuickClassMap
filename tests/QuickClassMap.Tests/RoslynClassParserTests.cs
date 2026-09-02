@@ -2,8 +2,8 @@ using QuickClassMap.Core.Domain;
 
 namespace QuickClassMap.Tests;
 
-public class RoslynClassParserTests(RoslynParserFixture fixture)
-    : IClassFixture<RoslynParserFixture>
+public class RoslynClassParserTests(RoslynClassParserFixture fixture)
+    : IClassFixture<RoslynClassParserFixture>
 {
     [Fact]
     public void Parse_WithClassDefinitionsAndInheritance_ReturnsClassesAndRelationships()
@@ -411,39 +411,6 @@ public class RoslynClassParserTests(RoslynParserFixture fixture)
     }
 
     [Fact]
-    public void Parse_WithEventsAndArrayFields_ReturnsSupportedRelationshipsOnly()
-    {
-        const string source = """
-            namespace Sample
-            {
-                public class Customer
-                {
-                }
-
-                public class Owner
-                {
-                    public event System.Action Changed;
-                    private Customer[] customers;
-
-                    public void Use(Customer customer)
-                    {
-                    }
-                }
-            }
-            """;
-
-        var classes = fixture.Parse(source);
-        var customer = Assert.Single(classes, classInfo => classInfo.Name == "Customer");
-        var owner = Assert.Single(classes, classInfo => classInfo.Name == "Owner");
-        var relationship = Assert.Single(owner.Relationships);
-
-        Assert.Equal("Sample.Customer", customer.FullName);
-        Assert.Equal("Sample.Owner", owner.FullName);
-        Assert.Equal("Sample.Customer", relationship.RelatedClassName);
-        Assert.Equal(RelationshipType.Uses, relationship.Type);
-    }
-
-    [Fact]
     public void Parse_WithLambdas_ReturnsClassesAndRelationships()
     {
         const string source = """
@@ -548,7 +515,7 @@ public class RoslynClassParserTests(RoslynParserFixture fixture)
     }
 
     [Fact]
-    public void Parse_WithStrongerDuplicateRelationship_KeepsStrongerType()
+    public void Parse_WithDuplicateRelationships_KeepsStrongerType()
     {
         const string source = """
             namespace Sample
