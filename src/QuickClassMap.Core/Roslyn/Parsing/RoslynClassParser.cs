@@ -1,6 +1,7 @@
 using QuickClassMap.Core.Domain;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System.Collections.Generic;
@@ -91,7 +92,8 @@ namespace QuickClassMap.Core.Roslyn.Parsing
             return syntaxTree.GetRoot().DescendantNodes().Where(node =>
                 node is ClassDeclarationSyntax ||
                 node is InterfaceDeclarationSyntax ||
-                node is RecordDeclarationSyntax);
+                node is RecordDeclarationSyntax recordDeclaration &&
+                !recordDeclaration.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword));
         }
 
         public ClassInfo GenerateClassInfo(INamedTypeSymbol classSymbol, bool isInterface = false)

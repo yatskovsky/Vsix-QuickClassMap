@@ -5,7 +5,6 @@ using System.Linq;
 
 using Microsoft.CodeAnalysis;
 
-using QuickClassMap.Core.Domain;
 using QuickClassMap.Core.Roslyn.Parsing;
 
 namespace QuickClassMap.Core.Roslyn.Traversal
@@ -19,7 +18,7 @@ namespace QuickClassMap.Core.Roslyn.Traversal
             _typesBySymbol = new Dictionary<INamedTypeSymbol, SourceTypeInfo>(SymbolEqualityComparer.Default);
         }
 
-        public IReadOnlyCollection<SourceTypeInfo> Types => _typesBySymbol.Values.ToList();
+        public IEnumerable<SourceTypeInfo> Types => _typesBySymbol.Values;
 
         public static SourceTypeLookup Create(Compilation compilation)
         {
@@ -29,16 +28,9 @@ namespace QuickClassMap.Core.Roslyn.Traversal
             }
 
             var lookup = new SourceTypeLookup();
-            var classParser = new RoslynClassParser(
-                new Dictionary<INamedTypeSymbol, ClassInfo>(SymbolEqualityComparer.Default));
-
-            foreach (var syntaxTree in compilation.SyntaxTrees)
+            foreach (var symbol in EnumerateSourceTypes(compilation.Assembly.GlobalNamespace))
             {
-                var semanticModel = compilation.GetSemanticModel(syntaxTree);
-                foreach (var sourceType in classParser.DiscoverSourceTypes(syntaxTree, semanticModel))
-                {
-                    lookup.Add(sourceType);
-                }
+                lookup.Add(new SourceTypeInfo(symbol, symbol.DeclaringSyntaxReferences));
             }
 
             return lookup;
@@ -75,6 +67,41 @@ namespace QuickClassMap.Core.Roslyn.Traversal
             }
 
             _typesBySymbol[symbol] = sourceType;
+        }
+
+        private static IEnumerable<INamedTypeSymbol> EnumerateSourceTypes(INamespaceSymbol namespaceSymbol)
+        {
+            foreach (var typeSymbol in namespaceSymbol.GetTypeMembers())
+            {
+                foreach (var nestedType in EnumerateSourceTypes(typeSymbol))
+                {
+                    yield return nestedType;
+                }
+            }
+
+            foreach (var nestedNamespace in namespaceSymbol.GetNamespaceMembers())
+            {
+                foreach (var typeSymbol in EnumerateSourceTypes(nestedNamespace))
+                {
+                    yield return typeSymbol;
+                }
+            }
+        }
+
+        private static IEnumerable<INamedTypeSymbol> EnumerateSourceTypes(INamedTypeSymbol typeSymbol)
+        {
+            if (typeSymbol.TypeKind == TypeKind.Class || typeSymbol.TypeKind == TypeKind.Interface)
+            {
+                yield return typeSymbol;
+            }
+
+            foreach (var nestedType in typeSymbol.GetTypeMembers())
+            {
+                foreach (var sourceType in EnumerateSourceTypes(nestedType))
+                {
+                    yield return sourceType;
+                }
+            }
         }
 
         private static string NormalizeFilePath(string filePath)

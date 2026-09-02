@@ -63,10 +63,11 @@ namespace QuickClassMap.Core.Roslyn.Traversal
             var relationshipParser = new RoslynRelationshipParser(
                 _compilation,
                 new Dictionary<INamedTypeSymbol, ClassInfo>(SymbolEqualityComparer.Default));
+            var relationshipLookup = new SourceRelationshipLookup(
+                relationshipParser,
+                direction == ClassGraphTraversalDirection.Up ? _sourceTypeLookup : null);
             var discoveredSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             var scheduledSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-            var relationshipCache = new Dictionary<INamedTypeSymbol, IReadOnlyCollection<SymbolRelationship>>(
-                SymbolEqualityComparer.Default);
             var discoveredRelationships = new List<SymbolRelationship>();
             var pendingSymbols = new Queue<SymbolDepth>();
 
@@ -86,7 +87,7 @@ namespace QuickClassMap.Core.Roslyn.Traversal
                 var current = pendingSymbols.Dequeue();
                 if (direction == ClassGraphTraversalDirection.Down)
                 {
-                    foreach (var relationship in GetRelationships(current.Symbol, relationshipParser, relationshipCache))
+                    foreach (var relationship in relationshipLookup.GetRelationships(current.Symbol))
                     {
                         if (!options.RelationshipTypes.Contains(relationship.Type))
                         {
@@ -116,31 +117,25 @@ namespace QuickClassMap.Core.Roslyn.Traversal
                 }
                 else if (direction == ClassGraphTraversalDirection.Up)
                 {
-                    foreach (var sourceType in _sourceTypeLookup.Types)
+                    foreach (var relationship in relationshipLookup.GetDependents(current.Symbol, cancellationToken))
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
-
-                        foreach (var relationship in GetRelationships(sourceType.Symbol, relationshipParser, relationshipCache))
+                        if (!options.RelationshipTypes.Contains(relationship.Type))
                         {
-                            if (!options.RelationshipTypes.Contains(relationship.Type) ||
-                                !SymbolEqualityComparer.Default.Equals(relationship.Target, current.Symbol))
-                            {
-                                continue;
-                            }
-
-                            var source = relationship.Source.OriginalDefinition;
-                            if (!TryDiscoverSymbol(
-                                source,
-                                current.Depth,
-                                options.MaxDepth,
-                                discoveredSymbols))
-                            {
-                                continue;
-                            }
-
-                            AddRelationship(discoveredRelationships, relationship);
-                            EnqueueSymbol(source, current.Depth + 1, scheduledSymbols, pendingSymbols);
+                            continue;
                         }
+
+                        var source = relationship.Source.OriginalDefinition;
+                        if (!TryDiscoverSymbol(
+                            source,
+                            current.Depth,
+                            options.MaxDepth,
+                            discoveredSymbols))
+                        {
+                            continue;
+                        }
+
+                        AddRelationship(discoveredRelationships, relationship);
+                        EnqueueSymbol(source, current.Depth + 1, scheduledSymbols, pendingSymbols);
                     }
                 }
             }
@@ -158,21 +153,6 @@ namespace QuickClassMap.Core.Roslyn.Traversal
                     location.IsInSource &&
                     location.SourceTree != null &&
                     _compilation.ContainsSyntaxTree(location.SourceTree));
-        }
-
-        private IReadOnlyCollection<SymbolRelationship> GetRelationships(
-            INamedTypeSymbol source,
-            RoslynRelationshipParser relationshipParser,
-            IDictionary<INamedTypeSymbol, IReadOnlyCollection<SymbolRelationship>> relationshipCache)
-        {
-            source = source.OriginalDefinition;
-            if (!relationshipCache.TryGetValue(source, out var relationships))
-            {
-                relationships = relationshipParser.ExtractSymbolRelationships(source);
-                relationshipCache.Add(source, relationships);
-            }
-
-            return relationships;
         }
 
         private bool TryDiscoverSymbol(
