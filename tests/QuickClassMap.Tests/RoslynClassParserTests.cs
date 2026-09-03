@@ -479,6 +479,49 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
     }
 
     [Fact]
+    public void Parse_WithInheritedTypesFromMultipleLevelsUsedInMethodBody_ReturnsOnlyInheritanceRelationship()
+    {
+        const string source = """
+            namespace Sample
+            {
+                public class Base
+                {
+                    public static void Execute()
+                    {
+                    }
+                }
+
+                public class Intermediate : Base
+                {
+                }
+
+                public class Derived : Intermediate
+                {
+                    public void Run()
+                    {
+                        Execute();
+                    }
+                }
+            }
+            """;
+
+        var classes = fixture.Parse(source);
+        var baseClass = Assert.Single(classes, classInfo => classInfo.Name == "Base");
+        var intermediate = Assert.Single(classes, classInfo => classInfo.Name == "Intermediate");
+        var derived = Assert.Single(classes, classInfo => classInfo.Name == "Derived");
+        var intermediateRelationship = Assert.Single(intermediate.Relationships);
+        var derivedRelationship = Assert.Single(derived.Relationships);
+
+        Assert.Equal("Sample.Base", baseClass.FullName);
+        Assert.Equal("Sample.Intermediate", intermediate.FullName);
+        Assert.Equal("Sample.Derived", derived.FullName);
+        Assert.Equal("Sample.Base", intermediateRelationship.RelatedClassName);
+        Assert.Equal(RelationshipType.Inherits, intermediateRelationship.Type);
+        Assert.Equal("Sample.Intermediate", derivedRelationship.RelatedClassName);
+        Assert.Equal(RelationshipType.Inherits, derivedRelationship.Type);
+    }
+
+    [Fact]
     public void Parse_WithSelfAndExternalTypes_DoesNotCreateRelationships()
     {
         const string source = """

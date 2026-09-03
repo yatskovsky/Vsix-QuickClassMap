@@ -13,19 +13,15 @@ namespace QuickClassMap.Core.Roslyn.Parsing
     {
         private readonly Compilation _compilation;
         private readonly Dictionary<INamedTypeSymbol, ClassInfo> _symbolToClassInfoMap;
-        private readonly Dictionary<INamedTypeSymbol, HashSet<INamedTypeSymbol>> _inheritanceHierarchy;
 
         public RoslynRelationshipParser(Compilation compilation, Dictionary<INamedTypeSymbol, ClassInfo> symbolToClassInfoMap)
         {
             _compilation = compilation;
             _symbolToClassInfoMap = symbolToClassInfoMap;
-            _inheritanceHierarchy = new Dictionary<INamedTypeSymbol, HashSet<INamedTypeSymbol>>(SymbolEqualityComparer.Default);
         }
 
         public void ProcessRelationships()
         {
-            BuildInheritanceHierarchy();
-
             foreach (var classSymbol in _symbolToClassInfoMap.Keys.ToList())
             {
                 var classInfo = _symbolToClassInfoMap[classSymbol];
@@ -40,30 +36,8 @@ namespace QuickClassMap.Core.Roslyn.Parsing
         {
             var relationships = new List<SymbolRelationship>();
             classSymbol = classSymbol.OriginalDefinition;
-            BuildInheritanceHierarchy(classSymbol);
             ExtractRelationships(classSymbol, relationships);
             return relationships;
-        }
-
-        private void BuildInheritanceHierarchy()
-        {
-            foreach (var classSymbol in _symbolToClassInfoMap.Keys)
-            {
-                BuildInheritanceHierarchy(classSymbol);
-            }
-        }
-
-        private void BuildInheritanceHierarchy(INamedTypeSymbol classSymbol)
-        {
-            classSymbol = classSymbol.OriginalDefinition;
-            var hierarchy = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-            var currentType = classSymbol;
-            while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
-            {
-                hierarchy.Add(currentType.OriginalDefinition);
-                currentType = currentType.BaseType;
-            }
-            _inheritanceHierarchy[classSymbol] = hierarchy;
         }
 
         private void ExtractRelationships(INamedTypeSymbol classSymbol, ICollection<SymbolRelationship> relationships)
@@ -217,10 +191,17 @@ namespace QuickClassMap.Core.Roslyn.Parsing
         {
             derivedType = derivedType.OriginalDefinition;
             potentialBaseType = potentialBaseType.OriginalDefinition;
-            if (_inheritanceHierarchy.TryGetValue(derivedType, out var hierarchy))
+            var currentType = derivedType;
+            while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
             {
-                return hierarchy.Contains(potentialBaseType);
+                if (SymbolEqualityComparer.Default.Equals(currentType.OriginalDefinition, potentialBaseType))
+                {
+                    return true;
+                }
+
+                currentType = currentType.BaseType;
             }
+
             return false;
         }
 
