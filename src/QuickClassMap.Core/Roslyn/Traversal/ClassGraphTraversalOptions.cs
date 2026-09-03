@@ -27,10 +27,25 @@ namespace QuickClassMap.Core.Roslyn.Traversal
             }
 
             RelationshipTypes = new HashSet<RelationshipType>(relationshipTypes);
+
+            DeepRelationshipTypes = new HashSet<RelationshipType>(RelationshipTypes);
+            DeepRelationshipTypes.Remove(RelationshipType.Uses);
         }
 
         public int MaxDepth { get; init; } = 1;
 
-        public ISet<RelationshipType> RelationshipTypes { get; }
+        public ISet<RelationshipType> GetRelationshipTypes(int currentDepth)
+        {
+            if (currentDepth <= 1)
+            {
+                return RelationshipTypes;
+            }
+
+            return DeepRelationshipTypes;
+        }
+
+        private ISet<RelationshipType> RelationshipTypes { get; }
+
+        private ISet<RelationshipType> DeepRelationshipTypes { get; }
     }
 }

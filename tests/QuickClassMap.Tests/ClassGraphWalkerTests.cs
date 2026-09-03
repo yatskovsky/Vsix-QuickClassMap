@@ -238,6 +238,38 @@ public class ClassGraphWalkerTests(ClassGraphWalkerFixture fixture)
     }
 
     [Fact]
+    public async Task ParseWithWalkDown_DoesNotFollowUsesRelationshipsBeyondDepthOne()
+    {
+        const string source = """
+            namespace Sample
+            {
+                public class A
+                {
+                    public void Use(B value) { }
+                }
+
+                public class B
+                {
+                    public void Use(C value) { }
+                }
+
+                public class C
+                {
+                    public void Use(D value) { }
+                }
+
+                public class D
+                {
+                }
+            }
+            """;
+
+        var classes = await fixture.ParseWalkDownAsync(source, "A", maxDepth: 3);
+
+        Assert.Equal(new[] { "A", "B", "C" }, classes.Select(classInfo => classInfo.Name).OrderBy(name => name));
+    }
+
+    [Fact]
     public async Task ParseWithWalkDown_WithCycle_DoesNotLoopOrDuplicateClasses()
     {
         const string source = """

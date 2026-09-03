@@ -85,11 +85,12 @@ namespace QuickClassMap.Core.Roslyn.Traversal
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var current = pendingSymbols.Dequeue();
+                var filteredRelationshipTypes = options.GetRelationshipTypes(current.Depth);
                 if (direction == ClassGraphTraversalDirection.Down)
                 {
                     foreach (var relationship in relationshipLookup.GetRelationships(current.Symbol))
                     {
-                        if (!options.RelationshipTypes.Contains(relationship.Type))
+                        if (!filteredRelationshipTypes.Contains(relationship.Type))
                         {
                             continue;
                         }
@@ -119,7 +120,7 @@ namespace QuickClassMap.Core.Roslyn.Traversal
                 {
                     foreach (var relationship in relationshipLookup.GetDependents(current.Symbol, cancellationToken))
                     {
-                        if (!options.RelationshipTypes.Contains(relationship.Type))
+                        if (!filteredRelationshipTypes.Contains(relationship.Type))
                         {
                             continue;
                         }
