@@ -110,7 +110,7 @@ namespace QuickClassMap.Core.Roslyn.Parsing
         private void ProcessMethodBody(ICollection<SymbolRelationship> relationships, IMethodSymbol method, INamedTypeSymbol containingType)
         {
             var syntax = method.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
-            if (syntax is MethodDeclarationSyntax methodSyntax)
+            if (syntax is BaseMethodDeclarationSyntax methodSyntax)
             {
                 var semanticModel = _compilation.GetSemanticModel(methodSyntax.SyntaxTree);
                 var descendantNodes = methodSyntax.DescendantNodes();
@@ -148,10 +148,15 @@ namespace QuickClassMap.Core.Roslyn.Parsing
                     {
                         if (semanticModel.GetTypeInfo(objectCreation).Type is INamedTypeSymbol createdType &&
                             !SymbolEqualityComparer.Default.Equals(createdType, containingType) &&
-                            !IsInInheritanceHierarchy(containingType, createdType) &&
-                            !method.IsStatic)
+                            !IsInInheritanceHierarchy(containingType, createdType))
                         {
-                            AddSymbolRelationship(relationships, containingType, createdType, RelationshipType.Composes);
+                            RelationshipType relationshipType = IsAssignedToInstanceMember(
+                                objectCreation,
+                                semanticModel,
+                                containingType)
+                                ? RelationshipType.Composes
+                                : RelationshipType.Uses;
+                            AddSymbolRelationship(relationships, containingType, createdType, relationshipType);
                         }
                     }
                     else if (node is CastExpressionSyntax castExpression)
@@ -205,6 +210,25 @@ namespace QuickClassMap.Core.Roslyn.Parsing
             return false;
         }
 
+        private bool IsAssignedToInstanceMember(
+            ObjectCreationExpressionSyntax objectCreation,
+            SemanticModel semanticModel,
+            INamedTypeSymbol containingType)
+        {
+            if (!(objectCreation.Parent is AssignmentExpressionSyntax assignment) ||
+                !assignment.IsKind(SyntaxKind.SimpleAssignmentExpression))
+            {
+                return false;
+            }
+
+            var assignedSymbol = semanticModel.GetSymbolInfo(assignment.Left).Symbol;
+            return (assignedSymbol is IFieldSymbol || assignedSymbol is IPropertySymbol) &&
+                !assignedSymbol.IsStatic &&
+                SymbolEqualityComparer.Default.Equals(
+                    assignedSymbol.ContainingType?.OriginalDefinition,
+                    containingType.OriginalDefinition);
+        }
+
         private void ProcessTypeConversion(ICollection<SymbolRelationship> relationships, SyntaxNode typeNode, SemanticModel semanticModel, INamedTypeSymbol containingType)
         {
             var convertedType = semanticModel.GetTypeInfo(typeNode).Type;
@@ -243,17 +267,48 @@ namespace QuickClassMap.Core.Roslyn.Parsing
             if (symbol is IParameterSymbol)
                 return RelationshipType.Aggregates;
 
-            // Check if the symbol is a property or field that matches a constructor parameter
+            // Explicitly initialized instance members are composed
             if (symbol is IPropertySymbol || symbol is IFieldSymbol)
             {
+                if (!symbol.IsStatic && IsInitializedWithObjectCreation(symbol, typeSymbol))
+                {
+                    return RelationshipType.Composes;
+                }
+
                 if (IsConstructorParameter(typeSymbol, containingType))
                 {
                     return RelationshipType.Aggregates;
                 }
             }
 
-            // For other cases, use accessibility to determine the relationship
-            return symbol.DeclaredAccessibility == Accessibility.Private ? RelationshipType.Composes : RelationshipType.Aggregates;
+            return RelationshipType.Aggregates;
+        }
+
+        private bool IsInitializedWithObjectCreation(ISymbol member, ITypeSymbol declaredType)
+        {
+            foreach (var syntaxReference in member.DeclaringSyntaxReferences)
+            {
+                var syntax = syntaxReference.GetSyntax();
+                EqualsValueClauseSyntax initializer = null;
+
+                if (syntax is VariableDeclaratorSyntax variableDeclarator)
+                {
+                    initializer = variableDeclarator.Initializer;
+                }
+                else if (syntax is PropertyDeclarationSyntax propertyDeclaration)
+                {
+                    initializer = propertyDeclaration.Initializer;
+                }
+
+                if (initializer?.Value is ObjectCreationExpressionSyntax objectCreation &&
+                    _compilation.GetSemanticModel(objectCreation.SyntaxTree).GetTypeInfo(objectCreation).Type is INamedTypeSymbol createdType &&
+                    _compilation.ClassifyConversion(createdType, declaredType).IsImplicit)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool IsCollectionType(ITypeSymbol typeSymbol)

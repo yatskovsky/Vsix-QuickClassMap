@@ -130,7 +130,7 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
     }
 
     [Fact]
-    public void Parse_WithFieldsAndProperties_ReturnsClassesAndRelationships()
+    public void Parse_WithAggregateFields_ReturnsClassesAndRelationships()
     {
         const string source = """
             namespace Sample
@@ -139,28 +139,23 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
                 {
                 }
 
-                public class AggregatingOwner
-                {
-                    public Customer Customer
-                    {
-                        get { return null; }
-                    }
-                }
-
-                public class ComposingOwner
-                {
-                    private Customer customer;
-                }
-
                 public class ConstructorOwner
                 {
-                    private Customer Customer
-                    {
-                        get { return null; }
-                    }
+                    private Customer customer;
 
                     public ConstructorOwner(Customer customer)
                     {
+                        this.customer = customer;
+                    }
+                }
+
+                public class MethodOwner
+                {
+                    private Customer customer;
+
+                    public void SetCustomer(Customer customer)
+                    {
+                        this.customer = customer;
                     }
                 }
             }
@@ -168,17 +163,147 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
 
         var classes = fixture.Parse(source);
         var customer = Assert.Single(classes, classInfo => classInfo.Name == "Customer");
-        var aggregatingOwner = Assert.Single(classes, classInfo => classInfo.Name == "AggregatingOwner");
-        var composingOwner = Assert.Single(classes, classInfo => classInfo.Name == "ComposingOwner");
+        var constructorOwner = Assert.Single(classes, classInfo => classInfo.Name == "ConstructorOwner");
+        var methodOwner = Assert.Single(classes, classInfo => classInfo.Name == "MethodOwner");
+
+        Assert.Equal("Sample.Customer", customer.FullName);
+        Assert.False(customer.IsInterface);
+        Assert.Equal(RelationshipType.Aggregates, Assert.Single(constructorOwner.Relationships).Type);
+        Assert.Equal(RelationshipType.Aggregates, Assert.Single(methodOwner.Relationships).Type);
+        Assert.All(constructorOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
+        Assert.All(methodOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
+    }
+
+    [Fact]
+    public void Parse_WithComposingFields_ReturnsClassesAndRelationships()
+    {
+        const string source = """
+            namespace Sample
+            {
+                public class Customer
+                {
+                }
+
+                public class FieldInitializerOwner
+                {
+                    private Customer customer = new Customer();
+                }
+
+                public class ConstructorOwner
+                {
+                    private Customer customer;
+
+                    public ConstructorOwner()
+                    {
+                        customer = new Customer();
+                    }
+                }
+
+                public class MethodOwner
+                {
+                    private Customer customer;
+
+                    public void Initialize()
+                    {
+                        customer = new Customer();
+                    }
+                }
+            }
+            """;
+
+        var classes = fixture.Parse(source);
+        var customer = Assert.Single(classes, classInfo => classInfo.Name == "Customer");
+        var fieldInitializerOwner = Assert.Single(classes, classInfo => classInfo.Name == "FieldInitializerOwner");
+        var constructorOwner = Assert.Single(classes, classInfo => classInfo.Name == "ConstructorOwner");
+        var methodOwner = Assert.Single(classes, classInfo => classInfo.Name == "MethodOwner");
+
+        Assert.Equal("Sample.Customer", customer.FullName);
+        Assert.False(customer.IsInterface);
+        Assert.Equal(RelationshipType.Composes, Assert.Single(fieldInitializerOwner.Relationships).Type);
+        Assert.Equal(RelationshipType.Composes, Assert.Single(constructorOwner.Relationships).Type);
+        Assert.Equal(RelationshipType.Composes, Assert.Single(methodOwner.Relationships).Type);
+        Assert.All(fieldInitializerOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
+        Assert.All(constructorOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
+        Assert.All(methodOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
+    }
+
+    [Fact]
+    public void Parse_WithAggregateProperties_ReturnsClassesAndRelationships()
+    {
+        const string source = """
+            namespace Sample
+            {
+                public class Customer
+                {
+                }
+
+                public class PropertyOwner
+                {
+                    public Customer Customer { get; set; }
+                }
+
+                public class ConstructorOwner
+                {
+                    public Customer Customer { get; }
+
+                    public ConstructorOwner(Customer customer)
+                    {
+                        Customer = customer;
+                    }
+                }
+            }
+            """;
+
+        var classes = fixture.Parse(source);
+        var customer = Assert.Single(classes, classInfo => classInfo.Name == "Customer");
+        var propertyOwner = Assert.Single(classes, classInfo => classInfo.Name == "PropertyOwner");
         var constructorOwner = Assert.Single(classes, classInfo => classInfo.Name == "ConstructorOwner");
 
         Assert.Equal("Sample.Customer", customer.FullName);
         Assert.False(customer.IsInterface);
-        Assert.Equal(RelationshipType.Aggregates, Assert.Single(aggregatingOwner.Relationships).Type);
-        Assert.Equal(RelationshipType.Composes, Assert.Single(composingOwner.Relationships).Type);
+        Assert.Equal(RelationshipType.Aggregates, Assert.Single(propertyOwner.Relationships).Type);
         Assert.Equal(RelationshipType.Aggregates, Assert.Single(constructorOwner.Relationships).Type);
-        Assert.All(aggregatingOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
-        Assert.All(composingOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
+        Assert.All(propertyOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
+        Assert.All(constructorOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
+    }
+
+    [Fact]
+    public void Parse_WithComposingProperties_ReturnsClassesAndRelationships()
+    {
+        const string source = """
+            namespace Sample
+            {
+                public class Customer
+                {
+                }
+
+                public class PropertyInitializerOwner
+                {
+                    public Customer Customer { get; } = new Customer();
+                }
+
+                public class ConstructorOwner
+                {
+                    public Customer Customer { get; }
+
+                    public ConstructorOwner()
+                    {
+                        Customer = new Customer();
+                    }
+                }
+            }
+            """;
+
+        var classes = fixture.Parse(source);
+        var customer = Assert.Single(classes, classInfo => classInfo.Name == "Customer");
+        var propertyInitializerOwner = Assert.Single(classes, classInfo => classInfo.Name == "PropertyInitializerOwner");
+        var constructorOwner = Assert.Single(classes, classInfo => classInfo.Name == "ConstructorOwner");
+
+        Assert.Equal("Sample.Customer", customer.FullName);
+        Assert.False(customer.IsInterface);
+        Assert.Equal(RelationshipType.Composes, Assert.Single(propertyInitializerOwner.Relationships).Type);
+        Assert.Equal(RelationshipType.Composes, Assert.Single(constructorOwner.Relationships).Type);
+        Assert.All(propertyInitializerOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
         Assert.All(constructorOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
     }
 
@@ -250,9 +375,9 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
         Assert.Equal(RelationshipType.Aggregates, Assert.Single(collectionOwner.Relationships).Type);
         Assert.Equal(2, genericOwner.Relationships.Count);
         Assert.Contains(genericOwner.Relationships, relationship =>
-            relationship.RelatedClassName == "Sample.Customer" && relationship.Type == RelationshipType.Composes);
+            relationship.RelatedClassName == "Sample.Customer" && relationship.Type == RelationshipType.Aggregates);
         Assert.Contains(genericOwner.Relationships, relationship =>
-            relationship.RelatedClassName == "Sample.Box<T>" && relationship.Type == RelationshipType.Composes);
+            relationship.RelatedClassName == "Sample.Box<T>" && relationship.Type == RelationshipType.Aggregates);
     }
 
     [Fact]
@@ -332,7 +457,7 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
     }
 
     [Fact]
-    public void Parse_WithObjectCreation_ReturnsClassesAndRelationships()
+    public void Parse_WithFactoryMethods_ReturnsUsesRelationships()
     {
         const string source = """
             namespace Sample
@@ -349,11 +474,11 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
                     }
                 }
 
-                public class StaticFactory
+                public static class StaticFactory
                 {
-                    public static void Create()
+                    public static Product Create()
                     {
-                        var product = new Product();
+                        return new Product();
                     }
                 }
             }
@@ -363,14 +488,14 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
         var product = Assert.Single(classes, classInfo => classInfo.Name == "Product");
         var factory = Assert.Single(classes, classInfo => classInfo.Name == "Factory");
         var staticFactory = Assert.Single(classes, classInfo => classInfo.Name == "StaticFactory");
-        var relationship = Assert.Single(factory.Relationships);
 
         Assert.Equal("Sample.Product", product.FullName);
         Assert.Equal("Sample.Factory", factory.FullName);
         Assert.Equal("Sample.StaticFactory", staticFactory.FullName);
-        Assert.Equal("Sample.Product", relationship.RelatedClassName);
-        Assert.Equal(RelationshipType.Composes, relationship.Type);
-        Assert.Empty(staticFactory.Relationships);
+        Assert.Equal(RelationshipType.Uses, Assert.Single(factory.Relationships).Type);
+        Assert.Equal(RelationshipType.Uses, Assert.Single(staticFactory.Relationships).Type);
+        Assert.All(factory.Relationships, relationship => Assert.Equal("Sample.Product", relationship.RelatedClassName));
+        Assert.All(staticFactory.Relationships, relationship => Assert.Equal("Sample.Product", relationship.RelatedClassName));
     }
 
     [Fact]
@@ -569,7 +694,7 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
 
                 public class Owner
                 {
-                    private Customer customer;
+                    private Customer customer = new Customer();
 
                     public void Use(Customer customer)
                     {
