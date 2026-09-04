@@ -338,7 +338,41 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
     }
 
     [Fact]
-    public void Parse_WithCollectionAndGenericMembers_ReturnsClassesAndRelationships()
+    public void Parse_WithCollectionMembers_ReturnsClassesAndRelationships()
+    {
+        const string source = """
+            namespace Sample
+            {
+                public class Customer
+                {
+                }
+
+                public class CollectionOwner
+                {
+                    private System.Collections.Generic.List<Customer> customers;
+                }
+
+                public class ArrayOwner
+                {
+                    private Customer[] customers;
+                }
+
+            }
+            """;
+
+        var classes = fixture.Parse(source);
+        var customer = Assert.Single(classes, classInfo => classInfo.Name == "Customer");
+        var collectionOwner = Assert.Single(classes, classInfo => classInfo.Name == "CollectionOwner");
+        var arrayOwner = Assert.Single(classes, classInfo => classInfo.Name == "ArrayOwner");
+
+        Assert.Equal("Sample.Customer", customer.FullName);
+        Assert.Equal(RelationshipType.Aggregates, Assert.Single(collectionOwner.Relationships).Type);
+        Assert.Equal(RelationshipType.Aggregates, Assert.Single(arrayOwner.Relationships).Type);
+        Assert.All(arrayOwner.Relationships, relationship => Assert.Equal("Sample.Customer", relationship.RelatedClassName));
+    }
+
+    [Fact]
+    public void Parse_WithGenericMembers_ReturnsClassesAndRelationships()
     {
         const string source = """
             namespace Sample
@@ -351,11 +385,6 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
                 {
                 }
 
-                public class CollectionOwner
-                {
-                    private System.Collections.Generic.List<Customer> customers;
-                }
-
                 public class GenericOwner
                 {
                     private Box<Customer> box;
@@ -366,13 +395,11 @@ public class RoslynClassParserTests(RoslynClassParserFixture fixture)
         var classes = fixture.Parse(source);
         var customer = Assert.Single(classes, classInfo => classInfo.Name == "Customer");
         var box = Assert.Single(classes, classInfo => classInfo.Name == "Box<T>");
-        var collectionOwner = Assert.Single(classes, classInfo => classInfo.Name == "CollectionOwner");
         var genericOwner = Assert.Single(classes, classInfo => classInfo.Name == "GenericOwner");
 
         Assert.Equal("Sample.Customer", customer.FullName);
         Assert.Equal("Sample.Box<T>", box.FullName);
         Assert.False(box.IsInterface);
-        Assert.Equal(RelationshipType.Aggregates, Assert.Single(collectionOwner.Relationships).Type);
         Assert.Equal(2, genericOwner.Relationships.Count);
         Assert.Contains(genericOwner.Relationships, relationship =>
             relationship.RelatedClassName == "Sample.Customer" && relationship.Type == RelationshipType.Aggregates);

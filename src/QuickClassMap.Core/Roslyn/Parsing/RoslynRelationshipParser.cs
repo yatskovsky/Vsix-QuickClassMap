@@ -379,6 +379,12 @@ namespace QuickClassMap.Core.Roslyn.Parsing
             ITypeSymbol relatedType,
             RelationshipType relationshipType)
         {
+            if (relatedType is IArrayTypeSymbol arrayType)
+            {
+                AddSymbolRelationship(relationships, source, arrayType.ElementType, relationshipType);
+                return;
+            }
+
             if (!(relatedType is INamedTypeSymbol namedTypeSymbol))
             {
                 return;
