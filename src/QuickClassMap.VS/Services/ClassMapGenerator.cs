@@ -62,6 +62,8 @@ namespace QuickClassMap.VS.Services
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
+            await KnownUIContexts.SolutionExistsAndFullyLoadedContext;
+
             var statusBarService = new StatusBarService(package);
             var statusBarCancellation = new CancellationTokenSource();
             try
