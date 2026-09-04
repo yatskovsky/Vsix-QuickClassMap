@@ -41,7 +41,10 @@ namespace QuickClassMap.VS.Services
                 }
                 else if (selectedItem.IsFolder())
                 {
-                    CollectDocuments(selectedItem.ProjectItem.ProjectItems, documents);
+                    if (selectedItem.ProjectItem.ProjectItems != null)
+                    {
+                        CollectDocuments(selectedItem.ProjectItem.ProjectItems, documents);
+                    }
                 }
                 else if (selectedItem.IsFile())
                 {
@@ -76,7 +79,10 @@ namespace QuickClassMap.VS.Services
                 }
                 else if (item.Kind == Constants.vsProjectItemKindPhysicalFolder)
                 {
-                    CollectDocuments(item.ProjectItems, documents);
+                    if (item.ProjectItems != null)
+                    {
+                        CollectDocuments(item.ProjectItems, documents);
+                    }
                 }
             }
         }

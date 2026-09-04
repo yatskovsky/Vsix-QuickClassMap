@@ -9,7 +9,7 @@ namespace QuickClassMap.VS.Services
     {
         private readonly IServiceProvider _serviceProvider;
 
-        private IVsStatusbar _statusBar;
+        private IVsStatusbar? _statusBar;
         private uint _progressCookie = 0;
 
         public StatusBarService(IServiceProvider serviceProvider)
@@ -17,7 +17,7 @@ namespace QuickClassMap.VS.Services
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
-        private IVsStatusbar StatusBar
+        private IVsStatusbar? StatusBar
         {
             get
             {

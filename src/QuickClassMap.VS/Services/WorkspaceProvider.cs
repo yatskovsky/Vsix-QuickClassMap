@@ -22,7 +22,8 @@ namespace QuickClassMap.VS.Services
 
         public async Task<Workspace> GetWorkspaceAsync()
         {
-            var componentModel = await _serviceProvider.GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
+            var componentModel = await _serviceProvider.GetServiceAsync(typeof(SComponentModel)) as IComponentModel
+                ?? throw new InvalidOperationException("The component model service is unavailable.");
             return componentModel.GetService<VisualStudioWorkspace>();
         }
 

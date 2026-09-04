@@ -29,6 +29,7 @@ namespace QuickClassMap.VS.Commands
             ClassMapGenerator classMapGenerator,
             OleMenuCommandService commandService)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             this.classMapGenerator = classMapGenerator ?? throw new ArgumentNullException(nameof(classMapGenerator));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
@@ -36,7 +37,7 @@ namespace QuickClassMap.VS.Commands
             AddWalkDepthCommands(commandService, walkDown: true);
         }
 
-        public static WalkClassMapCommand Instance { get; private set; }
+        public static WalkClassMapCommand Instance { get; private set; } = null!;
 
         public static async Task InitializeAsync(
             AsyncPackage package,
@@ -44,12 +45,15 @@ namespace QuickClassMap.VS.Commands
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
-            var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+            var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService
+                ?? throw new InvalidOperationException("The menu command service is unavailable.");
             Instance = new WalkClassMapCommand(classMapGenerator, commandService);
         }
 
         private void AddWalkDepthCommands(OleMenuCommandService commandService, bool walkDown)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var commandIds = walkDown
                 ? new[]
                 {
@@ -74,7 +78,11 @@ namespace QuickClassMap.VS.Commands
                 var commandId = new CommandID(CommandSet, commandIds[index]);
                 var depth = depths[index];
                 commandService.AddCommand(new MenuCommand(
-                    (sender, e) => OnWalk(walkDown, depth),
+                    (sender, e) =>
+                    {
+                        ThreadHelper.ThrowIfNotOnUIThread();
+                        OnWalk(walkDown, depth);
+                    },
                     commandId));
             }
         }

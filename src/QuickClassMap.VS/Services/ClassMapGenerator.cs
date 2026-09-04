@@ -54,7 +54,7 @@ namespace QuickClassMap.VS.Services
         private void StartGeneration(
             Func<RoslynDocumentParser, List<string>, IProgress<int>, CancellationToken, Task<List<ClassInfo>>> parse)
         {
-            AsyncHelper.FireAndForget(() => GenerateDiagramAsync(parse), HandleGenerationError);
+            AsyncHelper.FireAndForget(package, () => GenerateDiagramAsync(parse), HandleGenerationError);
         }
 
         private async Task GenerateDiagramAsync(
@@ -104,7 +104,7 @@ namespace QuickClassMap.VS.Services
 
             void UpdateProgress(int percent)
             {
-                AsyncHelper.FireAndForget(async () =>
+                AsyncHelper.FireAndForget(package, async () =>
                 {
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
